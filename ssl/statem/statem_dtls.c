@@ -1217,7 +1217,16 @@ redo:
         chretran = 1;
     }
 
-    if (msg_hdr.frag_len > 0 && msg_hdr.frag_len < msg_hdr.msg_len) {
+    /*
+     * A zero-length fragment of a non-empty message carries no data and must
+     * not be delivered as a complete message. Route it to the reassembly
+     * path, which already treats frag_len == 0 as DTLS1_HM_FRAGMENT_RETRY
+     * (see dtls1_reassemble_fragment), keeping the in-order path consistent
+     * with it. A fully empty message (frag_len == 0 && msg_len == 0) is
+     * unaffected.
+     */
+    if ((msg_hdr.frag_len > 0 && msg_hdr.frag_len < msg_hdr.msg_len)
+        || (msg_hdr.frag_len == 0 && msg_hdr.msg_len > 0)) {
         *errtype = dtls1_reassemble_fragment(s, &msg_hdr);
         return 0;
     }
