@@ -21,11 +21,8 @@
  * the read side via SSL_set_msg_callback().
  */
 
-#include <string.h>
-
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 #include "testutil.h"
 
 static int deliveries;
